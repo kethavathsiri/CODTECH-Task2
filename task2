@@ -1,1 +1,152 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.ArrayList;
+
+class Product {
+    private String name;
+    private int quantity;
+    private double price;
+
+    public Product(String name, int quantity, double price) {
+        this.name = name;
+        this.quantity = quantity;
+        this.price = price;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    public double getTotalValue() {
+        return quantity * price;
+    }
+
+    @Override
+    public String toString() {
+        return name + " (Quantity: " + quantity + ", Price: $" + price + ")";
+    }
+}
+
+class InventoryManagementSystem {
+    private ArrayList<Product> products;
+    private JFrame frame;
+    private JList<Product> productList;
+    private DefaultListModel<Product> listModel;
+
+    public InventoryManagementSystem() {
+        products = new ArrayList<>();
+        frame = new JFrame("Inventory Management System");
+        listModel = new DefaultListModel<>();
+        productList = new JList<>(listModel);
+
+        initializeUI();
+    }
+
+    private void initializeUI() {
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(400, 400);
+        frame.setLayout(new BorderLayout());
+
+        // Product list
+        frame.add(new JScrollPane(productList), BorderLayout.CENTER);
+
+        // Buttons
+        JPanel buttonPanel = new JPanel();
+        JButton addButton = new JButton("Add Product");
+        JButton editButton = new JButton("Edit Product");
+        JButton deleteButton = new JButton("Delete Product");
+        JButton reportButton = new JButton("Generate Report");
+        
+        buttonPanel.add(addButton);
+        buttonPanel.add(editButton);
+        buttonPanel.add(deleteButton);
+        buttonPanel.add(reportButton);
+        
+        frame.add(buttonPanel, BorderLayout.SOUTH);
+
+        // Button actions
+        addButton.addActionListener(e -> addProduct());
+        editButton.addActionListener(e -> editProduct());
+        deleteButton.addActionListener(e -> deleteProduct());
+        reportButton.addActionListener(e -> generateReport());
+
+        frame.setVisible(true);
+    }
+
+    private void addProduct() {
+        String name = JOptionPane.showInputDialog("Enter product name:");
+        if (name == null || name.trim().isEmpty()) return;
+
+        String quantityStr = JOptionPane.showInputDialog("Enter quantity:");
+        int quantity = Integer.parseInt(quantityStr);
+
+        String priceStr = JOptionPane.showInputDialog("Enter price:");
+        double price = Double.parseDouble(priceStr);
+
+        Product product = new Product(name, quantity, price);
+        products.add(product);
+        listModel.addElement(product);
+    }
+
+    private void editProduct() {
+        Product selectedProduct = productList.getSelectedValue();
+        if (selectedProduct == null) {
+            JOptionPane.showMessageDialog(frame, "Select a product to edit.");
+            return;
+        }
+
+        String name = JOptionPane.showInputDialog("Edit product name:", selectedProduct.getName());
+        String quantityStr = JOptionPane.showInputDialog("Edit quantity:", selectedProduct.getQuantity());
+        String priceStr = JOptionPane.showInputDialog("Edit price:", selectedProduct.getPrice());
+
+        if (name == null || name.trim().isEmpty()) {
+            name = selectedProduct.getName(); // Keep the original name if input is empty
+        }
+
+        int quantity = Integer.parseInt(quantityStr);
+        double price = Double.parseDouble(priceStr);
+
+        // Update the product's details
+        Product updatedProduct = new Product(name, quantity, price);
+        int index = productList.getSelectedIndex();
+        products.set(index, updatedProduct); // Update the product in the list
+        listModel.setElementAt(updatedProduct, index); // Update the displayed list
+    }
+
+    private void deleteProduct() {
+        Product selectedProduct = productList.getSelectedValue();
+        if (selectedProduct != null) {
+            products.remove(selectedProduct);
+            listModel.removeElement(selectedProduct);
+        } else {
+            JOptionPane.showMessageDialog(frame, "Select a product to delete.");
+        }
+    }
+
+    private void generateReport() {
+        StringBuilder report = new StringBuilder("Inventory Report:\n\n");
+        for (Product product : products) {
+            report.append(product).append("\n");
+        }
+
+        JOptionPane.showMessageDialog(frame, report.toString());
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new InventoryManagementSystem());
+    }
+}
 
